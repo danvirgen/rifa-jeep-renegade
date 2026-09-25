@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gran Rifa Jeep Renegade | Boletos Digitales</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- QRCode JS Generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        jeep: {
+                            green: '#2e3d28',
+                            darkgreen: '#1a2417',
+                            orange: '#ff6b00',
+                            yellow: '#f59e0b',
+                            dark: '#121212',
+                            light: '#f4f6f0',
+                            card: '#1e241c',
+                            cardborder: '#35472e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1a2417;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #ff6b00;
+            border-radius: 4px;
+        }
+        .ticket-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+            gap: 8px;
+        }
+        .bg-jeep-pattern {
+            background-color: #121212;
+            background-image: radial-gradient(#2e3d28 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #ticketPrintArea, #ticketPrintArea * {
+                visibility: visible;
+            }
+            #ticketPrintArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-jeep-dark text-gray-100 font-sans min-h-screen flex flex-col custom-scrollbar select-none">
+
+    <header class="sticky top-0 z-40 bg-jeep-darkgreen/95 backdrop-blur-md border-b border-jeep-green/40 shadow-xl">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-jeep-orange flex items-center justify-center text-black font-black text-xl shadow-lg shadow-jeep-orange/30">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base sm:text-xl tracking-wider text-white">RIFAS <span class="text-jeep-orange">ENTRE AMIGOS</span></h1>
+                    <p class="text-[11px] text-gray-400 hidden sm:block">Sorteo Automatizado con Lotería Nacional</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="openAdminModal()" class="bg-jeep-card hover:bg-jeep-green border border-jeep-green/60 text-gray-300 hover:text-white font-semibold px-3 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5" title="Panel de Administrador">
+                    <i class="fa-solid fa-lock text-jeep-yellow"></i>
+                    <span class="hidden md:inline">Panel Admin</span>
+                </button>
+                <a href="#boletos" class="bg-jeep-orange hover:bg-orange-600 text-black font-bold px-4 py-2 rounded-xl text-xs sm:text-sm transition-all shadow-lg flex items-center gap-2">
+                    <i class="fa-solid fa-ticket"></i>
+                    <span>Comprar Boletos</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="relative bg-jeep-pattern overflow-hidden border-b border-jeep-green/30">
+        <div class="max-w-7xl mx-auto px-4 py-8 sm:py-14 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            <div class="lg:col-span-7 space-y-5">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-jeep-orange/20 border border-jeep-orange/40 text-jeep-orange text-xs sm:text-sm font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-jeep-orange animate-ping"></span>
+                    ¡TRANSFERENCIA DIRECTA Y CONFIRMACIÓN POR WHATSAPP!
+                </div>
+
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight uppercase tracking-tight">
+                    Gánate una <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-jeep-orange via-jeep-yellow to-white">Jeep Renegade</span>
+                </h1>
+
+                <p class="text-gray-300 text-xs sm:text-base max-w-xl leading-relaxed">
+                    Aprovecha y aparta tus boletos al instante por $100 MXN. Realiza tu depósito a BanCoppel y confirma por WhatsApp para recibir tu boleto validado.
+                </p>
+
+                <!-- Cards de detalles -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                    <div class="bg-jeep-card p-3.5 rounded-xl border border-jeep-cardborder shadow-md">
+                        <p class="text-[11px] text-gray-400 font-semibold uppercase">Costo por Boleto</p>
+                        <p class="text-xl sm:text-2xl font-black text-jeep-orange">$100 <span class="text-xs text-white">MXN</span></p>
+                    </div>
+
+                    <div class="bg-jeep-card p-3.5 rounded-xl border border-jeep-cardborder shadow-md">
+                        <p class="text-[11px] text-gray-400 font-semibold uppercase">Total Números</p>
+                        <p class="text-xl sm:text-2xl font-black text-white">3,000</p>
+                    </div>
+
+                    <div class="bg-jeep-card p-3.5 rounded-xl border border-jeep-cardborder shadow-md col-span-2 sm:col-span-1">
+                        <p class="text-[11px] text-gray-400 font-semibold uppercase">Oportunidades</p>
+                        <p class="text-xl sm:text-2xl font-black text-jeep-yellow">0000 - 2999</p>
+                    </div>
+                </div>
+
+                <!-- Barra de Progreso -->
+                <div class="space-y-1.5 pt-2">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span class="text-gray-300">Progreso de Venta General</span>
+                        <span class="text-jeep-orange" id="progressText">Calculando...</span>
+                    </div>
+                    <div class="w-full bg-jeep-darkgreen h-3 rounded-full overflow-hidden p-0.5 border border-jeep-green/50">
+                        <div id="progressBar" class="bg-gradient-to-r from-jeep-orange to-jeep-yellow h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Imagen Real del Premio -->
+            <div class="lg:col-span-5">
+                <div class="relative rounded-2xl overflow-hidden border-2 border-jeep-green/60 shadow-2xl bg-jeep-card group">
+                    <img src="WhatsApp Image 2026-09-25 at 12.08.37 PM.jpeg" 
+                         alt="Jeep Renegade" 
+                         class="w-full h-64 sm:h-80 object-cover transform group-hover:scale-105 transition-transform duration-500">
+                    
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                    
+                    <div class="absolute bottom-4 left-4 right-4 bg-jeep-darkgreen/90 backdrop-blur-md p-3 rounded-xl border border-jeep-green/50">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-shield-halved text-jeep-yellow text-2xl"></i>
+                            <div>
+                                <p class="text-xs text-gray-300 uppercase font-bold">Sorteo Verificado</p>
+                                <p class="text-xs sm:text-sm font-extrabold text-white">Jeep Renegade + Entrega directa en México</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <main id="boletos" class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+        
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-black text-white flex items-center gap-2">
+                    <i class="fa-solid fa-grid-2 text-jeep-orange"></i> SELECCIONA TUS BOLETOS
+                </h2>
+                <p class="text-xs sm:text-sm text-gray-400 mt-1">Haz clic en los números que desees o utiliza los botones de azar rápido.</p>
+            </div>
+
+            <!-- Leyenda de Estados -->
+            <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-jeep-card border border-jeep-cardborder">
+                    <span class="w-3 h-3 rounded bg-jeep-card border border-jeep-green"></span> Disponible
+                </span>
+                <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-jeep-card border border-jeep-cardborder">
+                    <span class="w-3 h-3 rounded bg-jeep-orange"></span> Seleccionado
+                </span>
+                <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-jeep-card border border-jeep-cardborder">
+                    <span class="w-3 h-3 rounded bg-red-900/80 border border-red-700"></span> Pagado
+                </span>
+            </div>
+        </div>
+
+        <!-- Barra de Controles -->
+        <div class="bg-jeep-card p-4 rounded-2xl border border-jeep-cardborder mb-6 space-y-4 shadow-lg">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                
+                <div class="md:col-span-5 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar número (ej. 0420 o 1500)..." 
+                           class="w-full bg-jeep-dark border border-jeep-green/60 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-jeep-orange transition-all">
+                </div>
+
+                <div class="md:col-span-3">
+                    <select id="statusFilter" class="w-full bg-jeep-dark border border-jeep-green/60 rounded-xl py-2.5 px-3 text-sm text-white focus:outline-none focus:border-jeep-orange">
+                        <option value="all">Todos los números (3,000)</option>
+                        <option value="available">Solo Disponibles</option>
+                        <option value="selected">Mis Seleccionados</option>
+                        <option value="paid">Boletos Pagados</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-4 flex items-center gap-1.5">
+                    <span class="text-xs text-gray-400 font-semibold whitespace-nowrap hidden sm:inline">Azar:</span>
+                    <button onclick="selectRandom(1)" class="flex-1 bg-jeep-green hover:bg-jeep-green/80 text-white font-bold py-2.5 px-2 rounded-xl text-xs border border-jeep-green/80 transition-all">+1</button>
+                    <button onclick="selectRandom(5)" class="flex-1 bg-jeep-green hover:bg-jeep-green/80 text-white font-bold py-2.5 px-2 rounded-xl text-xs border border-jeep-green/80 transition-all">+5</button>
+                    <button onclick="selectRandom(10)" class="flex-1 bg-jeep-green hover:bg-jeep-green/80 text-white font-bold py-2.5 px-2 rounded-xl text-xs border border-jeep-green/80 transition-all">+10</button>
+                    <button onclick="selectRandom(20)" class="flex-1 bg-jeep-green hover:bg-jeep-green/80 text-white font-bold py-2.5 px-2 rounded-xl text-xs border border-jeep-green/80 transition-all">+20</button>
+                    <button onclick="clearSelection()" class="bg-red-900/40 hover:bg-red-900/70 text-red-300 border border-red-800 font-bold px-3 py-2.5 rounded-xl text-xs transition-all" title="Limpiar selección">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Matriz de Boletos -->
+        <div class="bg-jeep-card/60 p-4 rounded-2xl border border-jeep-cardborder shadow-inner">
+            <div id="ticketsGrid" class="ticket-grid min-h-[320px]"></div>
+
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-jeep-green/30">
+                <span class="text-xs text-gray-400" id="paginationInfo">Cargando boletos...</span>
+                <div class="flex items-center space-x-2" id="paginationControls"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Carrito Flotante -->
+    <div id="cartBar" class="fixed bottom-0 left-0 right-0 bg-jeep-darkgreen/95 backdrop-blur-md border-t border-jeep-orange/50 p-4 z-30 transform translate-y-full transition-transform duration-300 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-jeep-orange flex items-center justify-center text-black font-black text-lg">
+                        <span id="selectedCount">0</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-300 font-semibold">Boletos seleccionados</p>
+                        <p class="text-lg font-black text-white" id="selectedTotal">$0 MXN</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <button onclick="openCheckoutModal()" class="w-full sm:w-auto bg-gradient-to-r from-jeep-orange to-amber-500 hover:from-orange-600 hover:to-amber-600 text-black font-extrabold px-6 py-3.5 rounded-xl text-sm transition-all shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>CONFIRMAR APARTADO</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Datos de Pago BanCoppel -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-jeep-card border border-jeep-cardborder rounded-2xl max-w-lg w-full p-6 space-y-5 max-h-[92vh] overflow-y-auto custom-scrollbar relative shadow-2xl">
+            
+            <button onclick="closeCheckoutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div>
+                <h3 class="text-xl font-black text-white flex items-center gap-2">
+                    <i class="fa-solid fa-building-columns text-jeep-yellow"></i> FICHA DE PAGO BANCOPPEL
+                </h3>
+                <p class="text-xs text-gray-400">Realiza tu depósito o transferencia a las siguientes cuentas:</p>
+            </div>
+
+            <!-- Ficha Bancaria -->
+            <div class="bg-jeep-dark p-4 rounded-xl border border-jeep-green/40 space-y-3">
+                <div class="flex justify-between items-center border-b border-jeep-green/40 pb-2">
+                    <span class="text-xs text-gray-400 uppercase font-bold">Banco</span>
+                    <span class="font-bold text-white">BanCoppel</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-jeep-green/40 pb-2">
+                    <span class="text-xs text-gray-400 uppercase font-bold">Titulares</span>
+                    <span class="font-bold text-jeep-yellow text-xs text-right">José Antonio Rosas M / Janel Enriquez D</span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-400 uppercase font-bold block mb-1">Tarjeta Principal</span>
+                    <div class="bg-jeep-card p-2 rounded-lg font-mono font-bold text-base text-center text-jeep-orange border border-jeep-green/60 select-all">
+                        4169 1614 7454 6362
+                    </div>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-400 uppercase font-bold block mb-1">Tarjeta Secundaria / Alternativa</span>
+                    <div class="bg-jeep-card p-2 rounded-lg font-mono font-bold text-base text-center text-jeep-orange border border-jeep-green/60 select-all">
+                        4169 1614 5100 1837
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instrucción Especial para el Concepto de Pago -->
+            <div class="bg-jeep-orange/15 p-3 rounded-xl border border-jeep-orange/50 flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-info text-jeep-orange text-lg mt-0.5"></i>
+                <div class="text-xs">
+                    <span class="font-extrabold text-jeep-orange uppercase block">¡MUY IMPORTANTE AL TRANSFERIR!</span>
+                    <p class="text-gray-200 mt-0.5">En el <strong>Concepto / Motivo de Pago</strong> de tu transferencia SPEI, escribe los números asignados: <strong class="text-jeep-yellow select-all" id="modalConceptText"></strong></p>
+                </div>
+            </div>
+
+            <!-- Resumen Orden -->
+            <div class="bg-jeep-dark p-3.5 rounded-xl border border-jeep-green/40 space-y-1.5 text-xs">
+                <p><strong class="text-gray-300">Boletos a apartar:</strong> <span id="modalTicketList" class="font-bold text-jeep-orange"></span></p>
+                <p><strong class="text-gray-300">Total a depositar:</strong> <span id="modalTotalPay" class="font-bold text-white text-sm"></span></p>
+            </div>
+
+            <!-- Botón WhatsApp -->
+            <button onclick="confirmApartadoAndSend()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 rounded-xl text-sm transition-all shadow-lg flex items-center justify-center gap-2">
+                <i class="fa-brands fa-whatsapp text-xl"></i>
+                <span>ENVIAR COMPROBANTE POR WHATSAPP</span>
+            </button>
+            <p class="text-[11px] text-gray-400 text-center">Serás redirigido al WhatsApp 2971194658 para confirmar tu pago.</p>
+        </div>
+    </div>
+
+    <!-- Panel de Administración Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-jeep-card border border-jeep-green/80 rounded-2xl max-w-3xl w-full p-6 space-y-5 max-h-[92vh] overflow-y-auto custom-scrollbar relative shadow-2xl">
+            
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Acceso con Contraseña -->
+            <div id="adminAuthSection" class="space-y-4 text-center py-6">
+                <div class="w-14 h-14 rounded-full bg-jeep-orange/20 text-jeep-orange border border-jeep-orange/40 flex items-center justify-center mx-auto text-2xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="text-xl font-black text-white">ACCESO ADMINISTRADOR</h3>
+                <p class="text-xs text-gray-400">Ingresa la clave para ver estadísticas y controlar boletos vendidos</p>
+                
+                <div class="max-w-xs mx-auto space-y-3">
+                    <input type="password" id="adminPassInput" placeholder="Contraseña (admin123)" 
+                           class="w-full bg-jeep-dark border border-jeep-green/60 rounded-xl p-3 text-center text-sm text-white focus:outline-none focus:border-jeep-orange">
+                    <button onclick="checkAdminPassword()" class="w-full bg-jeep-orange hover:bg-orange-600 text-black font-extrabold py-2.5 rounded-xl text-xs transition-all">
+                        INGRESAR
+                    </button>
+                    <p id="adminAuthError" class="text-xs text-red-400 hidden">Contraseña incorrecta.</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Admin Completo -->
+            <div id="adminDashboardSection" class="hidden space-y-5">
+                <div class="flex justify-between items-center border-b border-jeep-green/40 pb-3">
+                    <div>
+                        <h3 class="text-xl font-black text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-jeep-orange"></i> DASHBOARD DE VENTAS
+                        </h3>
+                        <p class="text-xs text-gray-400">Gestión de boletos y transacciones registradas</p>
+                    </div>
+                    <button onclick="exportDataCSV()" class="bg-green-700 hover:bg-green-600 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-file-excel"></i> Exportar CSV
+                    </button>
+                </div>
+
+                <!-- Métricas -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div class="bg-jeep-dark p-3.5 rounded-xl border border-jeep-green/50">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Recaudado Estimado</p>
+                        <p class="text-lg sm:text-xl font-black text-green-400" id="adminStatRevenue">$0 MXN</p>
+                    </div>
+                    <div class="bg-jeep-dark p-3.5 rounded-xl border border-jeep-green/50">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Boletos Vendidos</p>
+                        <p class="text-lg sm:text-xl font-black text-jeep-orange" id="adminStatSold">0 / 3,000</p>
+                    </div>
+                    <div class="bg-jeep-dark p-3.5 rounded-xl border border-jeep-green/50 col-span-2 sm:col-span-1">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Disponibles</p>
+                        <p class="text-lg sm:text-xl font-black text-white" id="adminStatAvailable">3,000</p>
+                    </div>
+                </div>
+
+                <!-- Tabla de Ventas con botón Liberar -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-gray-300 uppercase">Historial de Ordenes / Boletos Registrados</h4>
+                    <div class="overflow-x-auto max-h-60 custom-scrollbar border border-jeep-green/40 rounded-xl">
+                        <table class="w-full text-left text-xs text-gray-300">
+                            <thead class="bg-jeep-dark text-gray-400 uppercase text-[10px] border-b border-jeep-green/40 sticky top-0">
+                                <tr>
+                                    <th class="p-2.5">Folio</th>
+                                    <th class="p-2.5">Boletos</th>
+                                    <th class="p-2.5">Monto</th>
+                                    <th class="p-2.5">Fecha</th>
+                                    <th class="p-2.5 text-right">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTransactionsTable">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Herramienta de Liberación o Cambios Manuales -->
+                <div class="p-3.5 bg-jeep-dark rounded-xl border border-jeep-green/40 space-y-2">
+                    <p class="text-xs font-bold text-gray-300">Liberación / Cambiar Estado Manual de Boleto</p>
+                    <div class="flex gap-2">
+                        <input type="number" id="adminTicketNumInput" min="0" max="2999" placeholder="Número (ej. 0420)" 
+                               class="bg-jeep-card border border-jeep-green/60 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-jeep-orange w-1/2">
+                        <button onclick="adminToggleTicketState()" class="bg-jeep-green hover:bg-jeep-green/80 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all w-1/2">
+                            Cambiar Estado
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_TICKETS = 3000;
+        const TICKET_PRICE = 100;
+        const PAGE_SIZE = 120;
+        const WHATSAPP_NUMBER = "522971194658";
+        const ADMIN_PASS = "admin123";
+
+        let currentPage = 1;
+        let selectedTickets = new Set();
+        let paidTicketsMap = new Map(); // Mapa de número -> Orden
+        let transactionsList = [];
+
+        function loadStorageData() {
+            try {
+                const stored = localStorage.getItem('jeep_transactions_v3');
+                if (stored) {
+                    transactionsList = JSON.parse(stored);
+                    transactionsList.forEach(order => {
+                        order.tickets.forEach(num => {
+                            paidTicketsMap.set(Number(num), order);
+                        });
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function saveStorageData() {
+            try {
+                localStorage.setItem('jeep_transactions_v3', JSON.stringify(transactionsList));
+            } catch (e) { console.error(e); }
+        }
+
+        function formatNumber(num) {
+            return num.toString().padStart(4, '0');
+        }
+
+        function renderTickets() {
+            const grid = document.getElementById('ticketsGrid');
+            grid.innerHTML = '';
+
+            const searchVal = document.getElementById('searchInput').value.trim();
+            const filterVal = document.getElementById('statusFilter').value;
+
+            let filtered = [];
+            for (let i = 0; i < TOTAL_TICKETS; i++) {
+                const numStr = formatNumber(i);
+                const isPaid = paidTicketsMap.has(i);
+                const isSelected = selectedTickets.has(i);
+
+                if (searchVal && !numStr.includes(searchVal)) continue;
+
+                if (filterVal === 'available' && (isPaid || isSelected)) continue;
+                if (filterVal === 'selected' && !isSelected) continue;
+                if (filterVal === 'paid' && !isPaid) continue;
+
+                filtered.push(i);
+            }
+
+            const totalFiltered = filtered.length;
+            const totalPages = Math.ceil(totalFiltered / PAGE_SIZE) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIndex = (currentPage - 1) * PAGE_SIZE;
+            const endIndex = Math.min(startIndex + PAGE_SIZE, totalFiltered);
+            const pageTickets = filtered.slice(startIndex, endIndex);
+
+            pageTickets.forEach(num => {
+                const numStr = formatNumber(num);
+                const isPaid = paidTicketsMap.has(num);
+                const isSelected = selectedTickets.has(num);
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                
+                let classes = "py-2 px-1 rounded-xl text-xs font-bold transition-all border shadow-sm flex flex-col items-center justify-center ";
+                
+                if (isPaid) {
+                    classes += "bg-red-950/50 text-red-400/50 border-red-900/40 cursor-not-allowed line-through";
+                    btn.disabled = true;
+                    btn.innerHTML = `<span>${numStr}</span>`;
+                } else if (isSelected) {
+                    classes += "bg-jeep-orange text-black font-extrabold border-jeep-orange ring-2 ring-jeep-orange/50 scale-105";
+                    btn.onclick = () => toggleTicket(num);
+                    btn.innerHTML = `<span>${numStr}</span>`;
+                } else {
+                    classes += "bg-jeep-card hover:bg-jeep-green text-gray-200 border-jeep-cardborder hover:border-jeep-orange";
+                    btn.onclick = () => toggleTicket(num);
+                    btn.innerHTML = `<span>${numStr}</span>`;
+                }
+
+                btn.className = classes;
+                grid.appendChild(btn);
+            });
+
+            updatePaginationUI(totalFiltered, startIndex, endIndex, totalPages);
+            updateProgressBar();
+        }
+
+        function toggleTicket(num) {
+            if (paidTicketsMap.has(num)) return;
+
+            if (selectedTickets.has(num)) {
+                selectedTickets.delete(num);
+            } else {
+                selectedTickets.add(num);
+            }
+
+            updateCartUI();
+            renderTickets();
+        }
+
+        function selectRandom(count) {
+            const available = [];
+            for (let i = 0; i < TOTAL_TICKETS; i++) {
+                if (!paidTicketsMap.has(i) && !selectedTickets.has(i)) {
+                    available.push(i);
+                }
+            }
+
+            const toSelect = Math.min(count, available.length);
+            for (let i = 0; i < toSelect; i++) {
+                const randomIndex = Math.floor(Math.random() * available.length);
+                selectedTickets.add(available[randomIndex]);
+                available.splice(randomIndex, 1);
+            }
+
+            updateCartUI();
+            renderTickets();
+        }
+
+        function clearSelection() {
+            selectedTickets.clear();
+            updateCartUI();
+            renderTickets();
+        }
+
+        function updateCartUI() {
+            const cartBar = document.getElementById('cartBar');
+            const count = selectedTickets.size;
+            const total = count * TICKET_PRICE;
+
+            document.getElementById('selectedCount').innerText = count;
+            document.getElementById('selectedTotal').innerText = `$${total.toLocaleString('es-MX')} MXN`;
+
+            if (count > 0) {
+                cartBar.classList.remove('translate-y-full');
+            } else {
+                cartBar.classList.add('translate-y-full');
+            }
+        }
+
+        function updatePaginationUI(total, start, end, totalPages) {
+            const info = document.getElementById('paginationInfo');
+            const controls = document.getElementById('paginationControls');
+
+            info.innerText = total > 0 ? `Mostrando ${start + 1} - ${end} de ${total} números` : 'Sin resultados';
+            controls.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border ${currentPage === 1 ? 'opacity-40 cursor-not-allowed border-gray-700' : 'bg-jeep-card hover:bg-jeep-green border-jeep-cardborder'}`;
+            prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => { currentPage--; renderTickets(); };
+            controls.appendChild(prevBtn);
+
+            const pageText = document.createElement('span');
+            pageText.className = 'text-xs font-bold text-gray-300 px-2';
+            pageText.innerText = `${currentPage} / ${totalPages}`;
+            controls.appendChild(pageText);
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border ${currentPage === totalPages ? 'opacity-40 cursor-not-allowed border-gray-700' : 'bg-jeep-card hover:bg-jeep-green border-jeep-cardborder'}`;
+            nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { currentPage++; renderTickets(); };
+            controls.appendChild(nextBtn);
+        }
+
+        function updateProgressBar() {
+            const count = paidTicketsMap.size;
+            const percentage = Math.round((count / TOTAL_TICKETS) * 100);
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+            document.getElementById('progressText').innerText = `${percentage}% Vendido (${count}/${TOTAL_TICKETS})`;
+        }
+
+        function openCheckoutModal() {
+            if (selectedTickets.size === 0) return;
+
+            const sortedList = Array.from(selectedTickets).sort((a,b) => a - b).map(formatNumber);
+            const total = selectedTickets.size * TICKET_PRICE;
+
+            document.getElementById('modalTicketList').innerText = sortedList.join(', ');
+            document.getElementById('modalConceptText').innerText = sortedList.join(', ');
+            document.getElementById('modalTotalPay').innerText = `$${total.toLocaleString('es-MX')} MXN`;
+
+            document.getElementById('checkoutModal').classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.add('hidden');
+        }
+
+        function confirmApartadoAndSend() {
+            const sortedTickets = Array.from(selectedTickets).sort((a,b) => a - b);
+            const totalAmount = sortedTickets.length * TICKET_PRICE;
+            const folio = "FOL-" + Math.floor(100000 + Math.random() * 900000);
+            const dateStr = new Date().toLocaleString('es-MX');
+
+            const newOrder = {
+                folio: folio,
+                tickets: sortedTickets,
+                amount: totalAmount,
+                date: dateStr
+            };
+
+            transactionsList.push(newOrder);
+            sortedTickets.forEach(num => paidTicketsMap.set(num, newOrder));
+            saveStorageData();
+
+            let msg = `*¡HOLA! APARTÉ MIS BOLETOS:* 🚗💨\n\n`;
+            msg += `🎟️ *Folio:* #${folio}\n`;
+            msg += `🔢 *Boletos:* ${sortedTickets.map(formatNumber).join(', ')}\n`;
+            msg += `💰 *Total:* $${totalAmount} MXN\n`;
+            msg += `🏦 *Banco:* BanCoppel\n`;
+            msg += `📝 *Concepto usado en transferencia:* ${sortedTickets.map(formatNumber).join(', ')}\n\n`;
+            msg += `_Adjunto mi comprobante de transferencia para validar mi compra._`;
+
+            selectedTickets.clear();
+            closeCheckoutModal();
+            updateCartUI();
+            renderTickets();
+
+            window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // Panel de Admin
+        function openAdminModal() { document.getElementById('adminModal').classList.remove('hidden'); }
+        function closeAdminModal() { document.getElementById('adminModal').classList.add('hidden'); }
+
+        function checkAdminPassword() {
+            if (document.getElementById('adminPassInput').value === ADMIN_PASS) {
+                document.getElementById('adminAuthSection').classList.add('hidden');
+                document.getElementById('adminDashboardSection').classList.remove('hidden');
+                renderAdminDashboard();
+            } else {
+                document.getElementById('adminAuthError').classList.remove('hidden');
+            }
+        }
+
+        function renderAdminDashboard() {
+            const totalRevenue = transactionsList.reduce((sum, ord) => sum + ord.amount, 0);
+            const totalSold = paidTicketsMap.size;
+            const totalAvailable = TOTAL_TICKETS - totalSold;
+
+            document.getElementById('adminStatRevenue').innerText = `$${totalRevenue.toLocaleString('es-MX')} MXN`;
+            document.getElementById('adminStatSold').innerText = `${totalSold} / 3,000`;
+            document.getElementById('adminStatAvailable').innerText = `${totalAvailable}`;
+
+            const tableBody = document.getElementById('adminTransactionsTable');
+            tableBody.innerHTML = '';
+
+            if (transactionsList.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Sin ordenes o apartados registrados.</td></tr>`;
+                return;
+            }
+
+            transactionsList.slice().reverse().forEach((ord) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-jeep-green/30 hover:bg-jeep-dark/50";
+                tr.innerHTML = `
+                    <td class="p-2.5 font-mono text-jeep-orange">#${ord.folio}</td>
+                    <td class="p-2.5 font-bold text-jeep-yellow">${ord.tickets.map(formatNumber).join(', ')}</td>
+                    <td class="p-2.5 text-green-400 font-bold">$${ord.amount}</td>
+                    <td class="p-2.5 text-gray-400 text-[10px]">${ord.date}</td>
+                    <td class="p-2.5 text-right">
+                        <button onclick="deleteOrder('${ord.folio}')" class="text-red-400 hover:text-red-300 font-bold px-2.5 py-1 rounded bg-red-950/40 border border-red-800 text-[11px] transition-all">
+                            Liberar
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function deleteOrder(folio) {
+            if (!confirm(`¿Deseas liberar los boletos de la orden #${folio}?`)) return;
+
+            const orderIndex = transactionsList.findIndex(o => o.folio === folio);
+            if (orderIndex !== -1) {
+                const order = transactionsList[orderIndex];
+                order.tickets.forEach(num => paidTicketsMap.delete(num));
+                transactionsList.splice(orderIndex, 1);
+                saveStorageData();
+                renderAdminDashboard();
+                renderTickets();
+            }
+        }
+
+        function adminToggleTicketState() {
+            const input = document.getElementById('adminTicketNumInput');
+            const num = parseInt(input.value);
+
+            if (isNaN(num) || num < 0 || num >= TOTAL_TICKETS) {
+                alert("Ingresa un número válido entre 0 y 2999.");
+                return;
+            }
+
+            if (paidTicketsMap.has(num)) {
+                const order = paidTicketsMap.get(num);
+                order.tickets = order.tickets.filter(n => n !== num);
+                paidTicketsMap.delete(num);
+                if (order.tickets.length === 0) {
+                    const idx = transactionsList.findIndex(o => o.folio === order.folio);
+                    if (idx !== -1) transactionsList.splice(idx, 1);
+                }
+            } else {
+                const manualOrder = {
+                    folio: "MANUAL-" + Math.floor(1000 + Math.random()*9000),
+                    tickets: [num],
+                    amount: TICKET_PRICE,
+                    date: new Date().toLocaleString('es-MX')
+                };
+                transactionsList.push(manualOrder);
+                paidTicketsMap.set(num, manualOrder);
+            }
+
+            saveStorageData();
+            input.value = '';
+            renderAdminDashboard();
+            renderTickets();
+        }
+
+        function exportDataCSV() {
+            if (transactionsList.length === 0) {
+                alert("No hay registros para exportar.");
+                return;
+            }
+
+            let csv = "Folio,Boletos,Monto,Fecha\n";
+            transactionsList.forEach(o => {
+                const boles = `"${o.tickets.map(formatNumber).join(';')}"`;
+                csv += `${o.folio},${boles},${o.amount},"${o.date}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", `rifa_jeep_renegade_ventas_${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', () => { currentPage = 1; renderTickets(); });
+        document.getElementById('statusFilter').addEventListener('change', () => { currentPage = 1; renderTickets(); });
+
+        window.onload = function() {
+            loadStorageData();
+            renderTickets();
+        };
+    </script>
+</body>
+</html>
